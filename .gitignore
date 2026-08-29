@@ -7,7 +7,8 @@ venv/
 
 # Playwright
 /crawler/downloads/
-/crawler/inspect_site.py
+ai-service/downloads/
+inspect_site.py
 
 # OS
 .DS_Store
@@ -16,3 +17,22 @@ venv/
 # IDE
 .vscode/
 .idea/
+
+# Frontend build artefacts
+node_modules/
+rdtii-frontend/dist/
+rdtii-frontend/public/vids
+*.tsbuildinfo
+
+# pytest
+.pytest_cache/
+
+# Draft ./
+PR_REPORT.md
+
+# Personal notes
+rdtii-frontend/obsidian_vault_rdtii/
+
+# Sidecar build artefacts
+extract_sidecar/target/
+

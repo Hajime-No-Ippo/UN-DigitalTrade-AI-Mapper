@@ -19,6 +19,47 @@ CREATE TABLE countries (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Comprehensive list of ESCAP members
+INSERT INTO countries (code, name, region) VALUES 
+('AFG', 'Afghanistan', 'Central Asia'),
+('ARM', 'Armenia', 'Central Asia'),
+('AZE', 'Azerbaijan', 'Central Asia'),
+('AUS', 'Australia', 'Oceania'),
+('BGD', 'Bangladesh', 'South Asia'),
+('BTN', 'Bhutan', 'South Asia'),
+('BRU', 'Brunei', 'Southeast Asia'),
+('KHM', 'Cambodia', 'Southeast Asia'),
+('CHN', 'China', 'East Asia'),
+('FJI', 'Fiji', 'Oceania'),
+('GEO', 'Georgia', 'Central Asia'),
+('IND', 'India', 'South Asia'),
+('IDN', 'Indonesia', 'Southeast Asia'),
+('IRN', 'Iran', 'South Asia'),
+('JPN', 'Japan', 'East Asia'),
+('KAZ', 'Kazakhstan', 'Central Asia'),
+('KGZ', 'Kyrgyzstan', 'Central Asia'),
+('LAO', 'Laos', 'Southeast Asia'),
+('MYS', 'Malaysia', 'Southeast Asia'),
+('MDV', 'Maldives', 'South Asia'),
+('MNG', 'Mongolia', 'East Asia'),
+('MMR', 'Myanmar', 'Southeast Asia'),
+('NPL', 'Nepal', 'South Asia'),
+('NZL', 'New Zealand', 'Oceania'),
+('PAK', 'Pakistan', 'South Asia'),
+('PHL', 'Philippines', 'Southeast Asia'),
+('KOR', 'Republic of Korea', 'East Asia'),
+('RUS', 'Russian Federation', 'North Asia'),
+('WSM', 'Samoa', 'Oceania'),
+('SGP', 'Singapore', 'Southeast Asia'),
+('LKA', 'Sri Lanka', 'South Asia'),
+('TJK', 'Tajikistan', 'Central Asia'),
+('THA', 'Thailand', 'Southeast Asia'),
+('TUR', 'Turkey', 'Central Asia'),
+('TKM', 'Turkmenistan', 'Central Asia'),
+('UZB', 'Uzbekistan', 'Central Asia'),
+('VNM', 'Vietnam', 'Southeast Asia')
+ON CONFLICT (code) DO NOTHING;
+
 CREATE TABLE rdtii_pillars (
     pillar_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     pillar_number INTEGER NOT NULL,
@@ -43,7 +84,7 @@ CREATE TABLE documents (
     filename VARCHAR(500) NOT NULL,
     file_path VARCHAR(1000) NOT NULL,
     country_code VARCHAR(3) REFERENCES countries(code),
-    source_url VARCHAR(2000),
+    source_url VARCHAR(2000) UNIQUE,
     upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'downloaded', 'processing', 'processed', 'failed')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -87,6 +128,21 @@ CREATE TABLE chunk_embeddings (
 CREATE INDEX idx_chunk_embeddings_embedding ON chunk_embeddings USING ivfflat (embedding vector_cosine_ops);
 CREATE INDEX idx_chunk_embeddings_document ON chunk_embeddings(document_id);
 CREATE INDEX idx_chunk_embeddings_country ON chunk_embeddings(country_code);
+
+-- ============================================================
+-- OCR / Extraction Cache (used by extract-sidecar)
+-- ============================================================
+
+CREATE TABLE extracted_documents (
+    id           VARCHAR(36)  PRIMARY KEY,
+    content_hash VARCHAR(64)  UNIQUE NOT NULL,
+    filename     VARCHAR(500) NOT NULL,
+    source_type  VARCHAR(50),
+    ocr_provider VARCHAR(100),
+    extracted_text TEXT        NOT NULL,
+    expires_at   TIMESTAMP,
+    created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+);
 
 -- ============================================================
 -- Extraction & Mapping
